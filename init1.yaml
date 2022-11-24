@@ -1,0 +1,12 @@
+version: '3.9'
+
+services:
+  db1:
+    environment:
+      MARIADB_GALERA_CLUSTER_BOOTSTRAP: "yes"
+  db2:
+    deploy:
+      replicas: 0
+  db3:
+    deploy:
+      replicas: 0

@@ -1,0 +1,54 @@
+version: '3.9'
+
+x-net: &net
+    networks:
+      backend:
+
+x-db: &db
+    image: bitnami/mariadb-galera
+    environment:
+      MARIADB_GALERA_CLUSTER_ADDRESS: gcomm://db1,db2,db3
+      MARIADB_ROOT_PASSWORD_FILE: /run/secrets/DB_PASSWORD
+      MARIADB_GALERA_MARIABACKUP_PASSWORD_FILE: /run/secrets/DB_PASSWORD
+      MARIADB_REPLICATION_PASSWORD_FILE: /run/secrets/DB_PASSWORD
+    stop_grace_period: 1m
+    <<: *net
+    volumes:
+      - db_data:/bitnami/mariadb
+    secrets:
+      - DB_PASSWORD
+
+networks:
+  backend:
+
+volumes:
+  db_data:
+
+secrets:
+  DB_PASSWORD:
+    file: .DB_PASSWORD
+
+services:
+  db1:
+    <<: *db
+    deploy:
+      placement:
+        constraints:
+          - "node.hostname==${DB1_HOST}"
+  db2:
+    <<: *db
+    deploy:
+      placement:
+        constraints:
+          - "node.hostname==${DB2_HOST}"
+  db3:
+    <<: *db
+    deploy:
+      placement:
+        constraints:
+          - "node.hostname==${DB3_HOST}"
+  adminer:
+    image: adminer
+    ports:
+      - 8080:8080
+    <<: *net
